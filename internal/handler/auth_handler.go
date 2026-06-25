@@ -32,3 +32,19 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	utils.BuildResponse(c, http.StatusOK, "Success", res)
 }
+
+func (h *AuthHandler) Register(c *gin.Context) {
+	var req dto.RegisterRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.BuildErrorResponse(c, http.StatusBadRequest, "Bad Request", err.Error())
+		return
+	}
+
+	res, err := h.authUsecase.Register(req)
+	if err != nil {
+		utils.BuildErrorResponse(c, http.StatusBadRequest, "Failed to register", err.Error())
+		return
+	}
+
+	utils.BuildResponse(c, http.StatusCreated, "Success", res)
+}

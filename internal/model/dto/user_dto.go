@@ -35,3 +35,12 @@ type MasyarakatResponse struct {
 	Phone    string `json:"phone"`
 	IsActive bool   `json:"is_active"`
 }
+
+type UpdateProfileRequest struct {
+	Name  string `json:"name" binding:"required"`
+	Phone string `json:"phone"`
+}
+
+type UpdateFCMTokenRequest struct {
+	FCMToken string `json:"fcm_token" binding:"required"`
+}

@@ -14,6 +14,9 @@ type UserUsecase interface {
 	UpdateAdminDinas(id uint, req dto.UpdateAdminDinasRequest) (*dto.AdminDinasResponse, error)
 	ToggleUserStatus(id uint, isActive bool) error
 	GetAllUsers() ([]dto.MasyarakatResponse, error)
+	GetProfile(id uint) (*dto.MasyarakatResponse, error)
+	UpdateProfile(id uint, req dto.UpdateProfileRequest) (*dto.MasyarakatResponse, error)
+	UpdateFCMToken(id uint, req dto.UpdateFCMTokenRequest) error
 }
 
 type userUsecase struct {
@@ -140,7 +143,6 @@ func (u *userUsecase) ToggleUserStatus(id uint, isActive bool) error {
 		return errors.New("user not found")
 	}
 
-	// Jangan izinkan blokir super_admin
 	if user.Role.Name == "super_admin" {
 		return errors.New("cannot change status of super_admin")
 	}
@@ -166,4 +168,52 @@ func (u *userUsecase) GetAllUsers() ([]dto.MasyarakatResponse, error) {
 		})
 	}
 	return res, nil
+}
+
+func (u *userUsecase) GetProfile(id uint) (*dto.MasyarakatResponse, error) {
+	user, err := u.userRepo.FindByID(id)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	return &dto.MasyarakatResponse{
+		ID:       user.ID,
+		Name:     user.Name,
+		Email:    user.Email,
+		Phone:    user.Phone,
+		IsActive: user.IsActive,
+	}, nil
+}
+
+func (u *userUsecase) UpdateProfile(id uint, req dto.UpdateProfileRequest) (*dto.MasyarakatResponse, error) {
+	user, err := u.userRepo.FindByID(id)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	user.Name = req.Name
+	user.Phone = req.Phone
+
+	err = u.userRepo.Update(user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.MasyarakatResponse{
+		ID:       user.ID,
+		Name:     user.Name,
+		Email:    user.Email,
+		Phone:    user.Phone,
+		IsActive: user.IsActive,
+	}, nil
+}
+
+func (u *userUsecase) UpdateFCMToken(id uint, req dto.UpdateFCMTokenRequest) error {
+	user, err := u.userRepo.FindByID(id)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	user.FCMToken = req.FCMToken
+	return u.userRepo.Update(user)
 }

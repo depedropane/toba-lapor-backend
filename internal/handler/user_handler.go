@@ -99,3 +99,54 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 
 	utils.BuildResponse(c, http.StatusOK, "Success", res)
 }
+
+func (h *UserHandler) GetProfile(c *gin.Context) {
+	userIDRaw, _ := c.Get("user_id")
+	userID := uint(userIDRaw.(float64))
+
+	res, err := h.userUsecase.GetProfile(userID)
+	if err != nil {
+		utils.BuildErrorResponse(c, http.StatusNotFound, "Not Found", err.Error())
+		return
+	}
+
+	utils.BuildResponse(c, http.StatusOK, "Success", res)
+}
+
+func (h *UserHandler) UpdateProfile(c *gin.Context) {
+	userIDRaw, _ := c.Get("user_id")
+	userID := uint(userIDRaw.(float64))
+
+	var req dto.UpdateProfileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.BuildErrorResponse(c, http.StatusBadRequest, "Bad Request", err.Error())
+		return
+	}
+
+	res, err := h.userUsecase.UpdateProfile(userID, req)
+	if err != nil {
+		utils.BuildErrorResponse(c, http.StatusInternalServerError, "Internal Server Error", err.Error())
+		return
+	}
+
+	utils.BuildResponse(c, http.StatusOK, "Success", res)
+}
+
+func (h *UserHandler) UpdateFCMToken(c *gin.Context) {
+	userIDRaw, _ := c.Get("user_id")
+	userID := uint(userIDRaw.(float64))
+
+	var req dto.UpdateFCMTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.BuildErrorResponse(c, http.StatusBadRequest, "Bad Request", err.Error())
+		return
+	}
+
+	err := h.userUsecase.UpdateFCMToken(userID, req)
+	if err != nil {
+		utils.BuildErrorResponse(c, http.StatusInternalServerError, "Internal Server Error", err.Error())
+		return
+	}
+
+	utils.BuildResponse(c, http.StatusOK, "Success", nil)
+}
